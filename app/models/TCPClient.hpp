@@ -8,8 +8,9 @@
 #include<string_view>
 #include<string>
 
-
 #include "SocketGuard.hpp"
+
+#pragma once
 
 [[noreturn]] void throw_errno(const char* msg)
 {
@@ -17,18 +18,6 @@
         std::string(msg) + ": " + strerror(errno)
     );
 } 
-
-void init_SO_KEEPALIVE(const int& fd)
-{
-    int opt = 1;
-    if(setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt))<-1)
-        throw_errno("Init, init_SO_KEEPALIVE, setsockopt: ");
-    
-    int idle = 30;
-    int intvl = 5;
-    int probes = 3;
-    
-}
 
 class TCPClient
 {

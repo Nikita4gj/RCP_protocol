@@ -1,8 +1,10 @@
+#include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 
-#pragma once
+#include <tuple>
 
+#pragma once
 
 class SocketGuard
 {
@@ -34,10 +36,31 @@ class SocketGuard
             return *this;
         }
 
-        void set_sock_nonblock()
+        void set_nonblock()
         {
             int flags = fcntl(fd, F_GETFL);
             fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+        }
+
+        using OPTION = std::tuple<int, int, int>;
+
+        template<class... OPTIONS>
+        void set_options(OPTIONS... tuples)
+        {
+            static_assert(
+                (std::is_constructible_v<OPTION, std::decay_t<OPTIONS>> && ...),
+                "The type must be constructed in std::tuple<int, int, int>"
+            );
+
+            auto set_option = [this](OPTION option) mutable
+            {
+                auto [level, optname, opt] = option;
+                if(setsockopt(fd, level, optname, &opt, sizeof(opt))<0);
+                    // ! throw_errno("SocketGuard, set_options")
+            };
+
+            (set_option(tuples), ...);
+            
         }
 
         const int& get(){return fd;}
