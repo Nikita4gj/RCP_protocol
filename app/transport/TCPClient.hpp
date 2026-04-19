@@ -13,7 +13,6 @@
 #include "../models/SocketGuard.hpp"
 #include "../utils/errors.hpp"
 
-
 namespace rpc::net
 {
     using rpc::models::SocketGuard;
